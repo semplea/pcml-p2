@@ -13,7 +13,7 @@ pos_train_file = data_folder + 'pos_train.txt'
 neg_train_file = data_folder + 'neg_train.txt'
 vocab_pickle = data_folder + 'vocab.pkl'
 cooc_pickle = data_folder + 'cooc.pkl'
-emmbeddings_file = data_folder + 'embeddings.npy'
+embeddings_file = data_folder + 'embeddings.npy'
 filter_sizes = "3,4,5" # must be a string, not array of int
 num_filters = 128
 
@@ -24,6 +24,9 @@ num_filters = 128
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_string("positive_data_file", pos_train_file, "Data source for the positive data.")
 tf.flags.DEFINE_string("negative_data_file", neg_train_file, "Data source for the positive data.")
+tf.flags.DEFINE_string("vocab_file", vocab_pickle, "Data source for the positive data.")
+tf.flags.DEFINE_string("embeddings_file", embeddings_file, "Data source for the positive data.")
+
 
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dim", embeddings_dim, "Dimensionality of character embedding (default: 128)")
@@ -54,37 +57,26 @@ print("")
 
 # Load data
 print("Loading data...")
-X_train, Y_train = load_data_label(pos_train_file, neg_train_file)
-print('X_train shape', X_train.shape,'Y_train shape',  Y_train.shape)
+x_train, y_train = load_data_label(FLAGS.positive_data_file, FLAGS.negative_data_file)
+print('X_train shape', x_train.shape,'Y_train shape',  y_train.shape)
 
 # load_vocab
-voacb = load_pickle(vocab_file)
-cooc = load_pickle(cooc_file)
-cooc_values = np.unique(cooc.row) # !!!!!!!!!!!!!!!!! NOT SUR ABOUT THAT PART, ONLY TO FIND THE LINE OF ONE WORD IN EMMBEDDINGS !!!!!!!!!!!!!!!!!
-embeddings = np.load(embeddings_file)
+vocab = load_pickle(FLAGS.vocab_file)
+embeddings = np.load(FLAGS.embeddings_file)
 
-
-#with open(cooc_file, 'rb') as f:
-#    cooc = pickle.load(f)
-#cooc_values = np.unique(cooc.row)
-#
-#with open(data_folder + 'vocab.pkl', 'rb') as f:
-#    vocab = pickle.load(f)
-#
 
 print(embeddings.shape)
-print(cooc_values.shape)
 print(len(vocab))
 
 # Randomly shuffle data
 np.random.seed(10)
-shuffle_indices = np.random.permutation(np.arange(len(y)))
-x_shuffled = x[shuffle_indices]
-y_shuffled = y[shuffle_indices]
+shuffle_indices = np.random.permutation(np.arange(len(y_train)))
+x_shuffled = x_train[shuffle_indices]
+y_shuffled = y_train[shuffle_indices]
 
 # Split train/test set
 # TODO: This is very crude, should use cross-validation
-dev_sample_index = -1 * int(FLAGS.dev_sample_percentage * float(len(y)))
+dev_sample_index = -1 * int(FLAGS.dev_sample_percentage * float(len(y_train)))
 x_train, x_dev = x_shuffled[:dev_sample_index], x_shuffled[dev_sample_index:]
 y_train, y_dev = y_shuffled[:dev_sample_index], y_shuffled[dev_sample_index:]
 print("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))

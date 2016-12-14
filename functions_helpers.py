@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 
 def load_data_label(pos, neg):
     with open(pos) as f:
