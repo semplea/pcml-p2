@@ -3,18 +3,20 @@ import numpy as np
 
 class TextCNN(object):
     def __init__(
-        self, sequence_length, num_classes, vocab_size,
-        embedding_size, filter_sizes, num_filters):
+        self, sequence_length, num_classes, vocab,
+        embedding_vectors, filter_sizes, num_filters):
         """
         sequence_length: length of our sentences (all must have the same length: pad all sentences)
         num_classes: number of classes in the output layer (2: positiv and negative)
-        vocab_size: the size of our vocabulary. This is needed to define the size
-                of our embedding layer which will have shape [voca_size, embedding_size]
-        embedding_size: the dimensionality of our embedding
+        vocab : the vocab dictionnary
+        embedding_vectors: the embedding vectors matrix
         filter_sizes: the number of words we want our convolutional to cover. we will have num_filters
                     specified size ex: [3,4,5]
         num_filters: the number of filter per filter size
         """
+        #create Variable
+        embedding_size = embedding_vectors.shape[1]
+        vocab_size = len(vocab)
 
         # Placeholders for input, output and dropout
         self.input_x = tf.placeholder(tf.int32, [None, sequence_length], name="input_x")
@@ -22,12 +24,18 @@ class TextCNN(object):
         self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
 
         #First layer: Embedding layer
-        with tf.device('/cpu:0'), tf.name_scope("embedding"):
-            W = tf.Variable(
-                tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0),
-                name="W")
-            self.embedded_chars = tf.nn.embedding_lookup(W, self.input_x)
-            self.embedded_chars_expanded = tf.expand_dims(self.embedded_chars, -1)
+        #with tf.device('/cpu:0'), tf.name_scope("embedding"):
+        #    W = tf.Variable(
+        #        tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0),
+        #        name="W")
+        #    self.embedded_chars = tf.nn.embedding_lookup(W, self.input_x)
+        #    self.embedded_chars_expanded = tf.expand_dims(self.embedded_chars, -1)
+
+        #inject embedding_vectors
+        W = tf.Variable(tf.constant(0.0, shape=[vocab_size, embedding_dim]),
+                trainable=False, name="W")
+        embedding_placeholder = tf.placeholder(tf.float32, [vocab_size, embedding_dim])
+        embedding_init = W.assign(embedding_placeholder)
 
         # Convolution and max pooling layers
         pooled_outputs = []
@@ -38,7 +46,7 @@ class TextCNN(object):
                 W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name="W")
                 b = tf.Variable(tf.constant(0.1, shape=[num_filters]), name="b")
                 conv = tf.nn.conv2d(
-                    self.embedded_chars_expanded,
+                    embedding_init,
                     W,
                     strides=[1, 1, 1, 1],
                     padding="VALID",
