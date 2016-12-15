@@ -23,9 +23,9 @@ num_filters = 128
 # Data loading params
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_string("positive_data_file", pos_train_file, "Data source for the positive data.")
-tf.flags.DEFINE_string("negative_data_file", neg_train_file, "Data source for the positive data.")
-tf.flags.DEFINE_string("vocab_file", vocab_pickle, "Data source for the positive data.")
-tf.flags.DEFINE_string("embeddings_file", embeddings_file, "Data source for the positive data.")
+tf.flags.DEFINE_string("negative_data_file", neg_train_file, "Data source for the negative data.")
+tf.flags.DEFINE_string("vocab_file", vocab_pickle, "Data source for the vocab data.")
+tf.flags.DEFINE_string("embeddings_file", embeddings_file, "Data source for the word embeddings.")
 
 
 # Model Hyperparameters
@@ -52,7 +52,7 @@ for attr, value in sorted(FLAGS.__flags.items()):
 print("")
 
 
-# Data Preparatopn
+# Data Preparation
 # ==================================================
 
 # Load data

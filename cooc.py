@@ -26,7 +26,7 @@ def main():
     counter = 1
     for fn in [pos_train, neg_train]:
         with open(fn) as f:
-            #itarate over each line of one file
+            #iterate over each line of one file
             for line in f:
                 tokens = [vocab.get(t, -1) for t in line.strip().split()]
                 tokens = [t for t in tokens if t >= 0]
