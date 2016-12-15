@@ -23,8 +23,7 @@ def padTweet(twitterSet):
     #get the max size among all tweet
     max_size = 0
     for l in twitterSet:
-        l_size = max(max_size, len(re.findall(r'\s', l)) + 1)
-
+        max_size = max(max_size, len(re.findall(r'\s', l)) + 1)
     #pad each tweet
     twitterPadded = []
 
