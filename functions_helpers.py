@@ -21,11 +21,9 @@ def load_pickle(file):
 
 def padTweet(twitterSet):
     #get the max size among all tweet
-    max_size = 0
     tweet_lengths = {}
     for i, l in enumerate(twitterSet):
         tweet_lengths[i] = len(re.findall(r'\s', l)) + 1
-        max_size = max(max_size, len(re.findall(r'\s', l)) + 1)
 
     max_size = max(tweet_lengths.items(), key=lambda x: x[1])[1]
 
@@ -34,6 +32,6 @@ def padTweet(twitterSet):
 
     for i, l in enumerate(twitterSet):
         l_size = tweet_lengths[i]
-        twitterPadded = np.append(twitterPadded, l + '<pad>' * (max_size - l_size))
+        twitterPadded = np.append(twitterPadded, l + ' <pad>' * (max_size - l_size))
 
     return twitterPadded
