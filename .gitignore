@@ -90,6 +90,7 @@ ENV/
 
 #Data
 twitter-datasets/
+runs/
 
 #Mac files
 .DS_Store
