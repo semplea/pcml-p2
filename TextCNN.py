@@ -31,12 +31,11 @@ class TextCNN(object):
             self.embedded_chars = tf.nn.embedding_lookup(W, self.input_x)
             self.embedded_chars_expanded = tf.expand_dims(self.embedded_chars, -1)
 
-
         #inject embedding_vectors
-        W = tf.Variable(tf.constant(0.0, shape=[vocab_size, embedding_dim]),
-                trainable=False, name="W")
-        embedding_placeholder = tf.placeholder(tf.float32, [vocab_size, embedding_dim])
-        embedding_init = W.assign(embedding_placeholder)
+        #W = tf.Variable(tf.constant(0.0, shape=[vocab_size, embedding_dim]),
+        #        trainable=False, name="W")
+        #embedding_placeholder = tf.placeholder(tf.float32, [vocab_size, embedding_dim])
+        #embedding_init = W.assign(embedding_placeholder)
 
         #transform input in
 

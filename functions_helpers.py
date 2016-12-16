@@ -7,16 +7,12 @@ from datetime import datetime
 def load_data_label(pos, neg):
     with open(pos) as f:
         pos_data = f.read().splitlines()
-
-        f = open(pos)
-        pos_data = f.read().splitlines()
     with open(neg) as f:
         neg_data = f.read().splitlines()
     train_data = np.append(pos_data, neg_data)
     positive_labels = [[1, 0] for _ in pos_data]
     negative_labels = [[0, 1] for _ in neg_data]
     label_data = np.concatenate([positive_labels, negative_labels], 0)
-    #return train_data, label_data
     return train_data, label_data
 
 def map_data(data, vocab, max_size=64):
@@ -29,7 +25,7 @@ def map_data(data, vocab, max_size=64):
         idx = [vocab.get(token,-1) for token in tweet.strip().split() if vocab.get(token,-1)>=0]
         idx_size = len(idx)
         if idx_size < max_size:
-            idx = np.append(idx, [size_vocab] * (max_size-idx_size))
+            idx = np.append(idx, [size_vocab] * (max_size-idx_size)) # TODO change pad
 
         output = np.vstack((output, idx))
     return output
