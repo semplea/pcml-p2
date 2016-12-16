@@ -16,19 +16,24 @@ def load_data_label(pos, neg):
     return train_data, label_data
 
 def map_data(data, vocab, max_size=64):
-    output = np.empty([0,max_size])
+    """
+    Create mapping from data point to integer vals for vocab in data point
+    """
+    output = np.empty([len(data),max_size])
     print('Total number of data: ', len(data))
     size_vocab = len(vocab)
     for i,tweet in enumerate(data):
         if (i % 10000) == 0:
             print(i)
         idx = [vocab.get(token,-1) for token in tweet.strip().split() if vocab.get(token,-1)>=0]
-        idx_size = len(idx)
+        idx_size = (idx)
         if idx_size < max_size:
             idx = np.append(idx, [size_vocab] * (max_size-idx_size)) # TODO change pad
 
-        output = np.vstack((output, idx))
+        output[i] = idx
     return output
+
+
 def load_pickle(file):
     with open(file, 'rb') as f:
         return pickle.load(f)
