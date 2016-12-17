@@ -3,12 +3,11 @@ import pickle
 import re
 from datetime import datetime
 
+data_folder = 'twitter-datasets/'
+
 
 def load_data_label(pos, neg):
     with open(pos) as f:
-        pos_data = f.read().splitlines()
-
-        f = open(pos)
         pos_data = f.read().splitlines()
     with open(neg) as f:
         neg_data = f.read().splitlines()
@@ -19,9 +18,10 @@ def load_data_label(pos, neg):
     #return train_data, label_data
     return train_data, label_data
 
-def map_data(data, vocab):
+def map_data(data, vocab, max_size=None, save=False):
     size_vocab = len(vocab)
-    max_size = find_max_length(data, vocab)
+    if max_size == None:
+        max_size = find_max_length(data, vocab)
     output = np.empty([len(data),max_size])
     print('Total number of data: ', len(data))
     for i,tweet in enumerate(data):
@@ -30,6 +30,8 @@ def map_data(data, vocab):
         idx = [vocab.get(token,-1) for token in tweet.strip().split() if vocab.get(token,-1)>=0]
         output[i] = pad_tweet(idx, max_size, size_vocab)
 
+    if save:
+        np.save(data_folder + 'x_train_padded', output)
     return output
 
 def find_max_length(data, vocab):
@@ -55,26 +57,13 @@ def load_pickle(file):
     with open(file, 'rb') as f:
         return pickle.load(f)
 
-
-#def padTweet(twitterSet):
-#    #get the max size among all tweet
-#    tweet_lengths = {}
-#    for i, l in enumerate(twitterSet):
-#        tweet_lengths[i] = len(re.findall(r'\s', l)) + 1
-#    max_size = max(tweet_lengths.items(), key=lambda x: x[1])[1]
-#    #pad each tweet
-#    twitterPadded = []
-#
-#    print('Totel number of tweets: ', len(twitterSet))
-#    print('Max_size: ', max_size)
-#    for i, l in enumerate(twitterSet):
-#        if i % 1000 == 0:
-#            print(i, 'tweet padded')
-#        l_size = tweet_lengths[i]
-#        twitterPadded = np.append(twitterPadded, l + ' <pad>' * (max_size - l_size))
-#
-#    print('Padding done')
-#    return twitterPadded
+def load_embeddings(file):
+    """
+    load word embeddings and add a dummy word that is the mean of all word embeddings.
+    That dummy word will correspond to the <pad> word
+    """
+    embeddings = np.load(file)
+    return np.vstack([embeddings, np.mean(embeddings, axis=0)])
 
 def batch_iter(data, batch_size, num_epochs, shuffle=True):
     """
@@ -94,3 +83,30 @@ def batch_iter(data, batch_size, num_epochs, shuffle=True):
             start_index = batch_num * batch_size
             end_index = min((batch_num + 1) * batch_size, data_size)
             yield shuffled_data[start_index:end_index]
+
+
+def load_test(file):
+    with open(file) as test:
+        test = test.read().splitlines()
+        output = [None] * len(test)
+        for i, tweet in enumerate(test):
+            regex =  re.match( r'(\d+)(,)(.+)', tweet )
+
+            tweet = regex.group(3)
+            output[i] = tweet
+        return output
+
+
+def convert_prediction(predictions):
+    def convert(x):
+        print(x)
+        if x[0] == 1:
+            return 1
+        else:
+            return -1
+
+    output = np.empty([len(predictions), 2])
+    for i, l in enumerate(predictions):
+        output[i] = [i, convert(l)]
+
+    return output
