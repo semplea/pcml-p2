@@ -24,40 +24,44 @@ class TextCNN(object):
         self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
 
         #First layer: Embedding layer
-        with tf.device('/cpu:0'), tf.name_scope("embedding_static"):
+        with tf.device('/cpu:0'), tf.name_scope("embedding"):
             W_static = tf.get_variable(
-                name="W",
+                name="W_static",
                 shape=[vocab_size, embedding_dim],
                 initializer=tf.constant_initializer(np.array(embedding_vectors)),
                 trainable = False)
-
-
-            #W_static = tf.
-            #Variable(
-            #    tf.random_uniform([vocab_size, embedding_dim], -1.0, 1.0),
-            #    name="W", trainable=False)
-            #W_static.assign(embedding_vectors)
             self.embedded_chars_static = tf.nn.embedding_lookup(W_static, self.input_x)
             self.embedded_chars_expanded_static = tf.expand_dims(self.embedded_chars_static, -1)
 
-        #with tf.device('/cpu:0'), tf.name_scope("embedding_dynamic"):
-        #    self.W_dynamic = tf.Variable(
-        #        tf.random_uniform([vocab_size, embedding_dim], -1.0, 1.0),
-        #        name="W", trainable=True)
+            W_dynamic = tf.get_variable(
+                name="W_dynamic",
+                shape=[vocab_size, embedding_dim],
+                initializer=tf.constant_initializer(np.array(embedding_vectors)),
+                trainable = True)
+            self.embedded_chars_dynamic = tf.nn.embedding_lookup(W_dynamic, self.input_x)
+            self.embedded_chars_expanded_dynamic = tf.expand_dims(self.embedded_chars_dynamic, -1)
+
+            self.W_concat = tf.concat(3, [self.embedded_chars_expanded_static, self.embedded_chars_expanded_dynamic], name='W_concat')
+
+        # with tf.device('/cpu:0'), tf.name_scope("embedding_dynamic"):
+        #    W_dynamic = tf.get_variable(
+        #        name="W",
+        #        shape=[vocab_size, embedding_dim],
+        #        initializer=tf.constant_initializer(np.array(embedding_vectors)),
+        #        trainable = True)
         #    self.embedded_chars_dynamic = tf.nn.embedding_lookup(self.W_dynamic, self.input_x)
         #    self.embedded_chars_expanded_dynamic = tf.expand_dims(self.embedded_chars_dynamic, -1)
 
 
         # Convolution and max pooling layers
         pooled_outputs = []
-        #embedded_chars_expandeds = [self.embedded_chars_expanded_static, self.embedded_chars_expanded_dynamic]
-        embedded_chars_expandeds = [self.embedded_chars_expanded_static]
+        embedded_chars_expandeds = [self.W_concat]
 
         for i, filter_size in enumerate(filter_sizes):
             for j,emb in enumerate(embedded_chars_expandeds):
                 with tf.name_scope("conv-maxpool-{}-{}".format(filter_size, j)):
                     # Convolution Layer
-                    filter_shape = [filter_size, embedding_dim, 1, num_filters]
+                    filter_shape = [filter_size, embedding_dim, 2, num_filters]
                     W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name="W")
                     b = tf.Variable(tf.constant(0.1, shape=[num_filters]), name="b")
                     conv = tf.nn.conv2d(
