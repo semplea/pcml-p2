@@ -15,8 +15,8 @@ def load_data_label(pos, neg):
     positive_labels = [[1, 0] for _ in pos_data]
     negative_labels = [[0, 1] for _ in neg_data]
     label_data = np.concatenate([positive_labels, negative_labels], 0)
-    #return train_data, label_data
     return train_data, label_data
+
 
 def map_data(data, vocab, max_size=None, save=False):
     size_vocab = len(vocab)
@@ -51,7 +51,6 @@ def pad_tweet(tweet, max_size, dummy_idx):
 
 def length_tweet(tweet, vocab):
     return len([vocab.get(token,-1) for token in tweet.strip().split() if vocab.get(token,-1)>=0])
-
 
 def load_pickle(file):
     with open(file, 'rb') as f:
