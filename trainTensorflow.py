@@ -18,10 +18,9 @@ pos_train_file = data_folder + 'pos_train.txt'
 neg_train_file = data_folder + 'neg_train.txt'
 vocab_pickle = data_folder + 'vocab.pkl'
 cooc_pickle = data_folder + 'cooc.pkl'
-embeddings_file = data_folder + 'embeddings.npy'
+embeddings_file = data_folder + 'embeddings_glove.npy'
 filter_sizes = "3,4,5" # must be a string, not array of int
 num_filters = 128
-
 train = False
 
 # Parameters
@@ -49,6 +48,8 @@ tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many ste
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
+tf.flags.DEFINE_boolean("load_existing_padded_file", True, "Load the existing padded tweet file")
+tf.flags.DEFINE_boolean("train", train, "Train data or compute predictions")
 
 #================================
 #Load data
@@ -72,8 +73,7 @@ print("")
 
 
 #pad and transform x_train
-load_existing_padded_file = True
-if load_existing_padded_file:
+if FLAGS.load_existing_padded_file:
     x_train = np.load(data_folder + 'x_train_padded.npy')
     print('x_train_padded loaded, shape: ', x_train.shape)
 else:
@@ -106,7 +106,7 @@ with tf.Graph().as_default():
                 sequence_length= x_train.shape[1],
                 num_classes=y_train.shape[1],
                 vocab_size=len(vocab) + 1, # the + 1 is for the <pad> token
-                embedding_dim= embeddings.shape[1],
+                embedding= embeddings,
                 filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
                 num_filters=FLAGS.num_filters)
 
@@ -162,6 +162,7 @@ with tf.Graph().as_default():
                   cnn.input_x: x_batch,
                   cnn.input_y: y_batch,
                   cnn.dropout_keep_prob: FLAGS.dropout_keep_prob,
+                  #cnn.embedding: embeddings
                 }
                 _, step, summaries, loss, accuracy = sess.run(
                     [train_op, global_step, train_summary_op, cnn.loss, cnn.accuracy],
@@ -178,7 +179,8 @@ with tf.Graph().as_default():
                 feed_dict = {
                   cnn.input_x: x_batch,
                   cnn.input_y: y_batch,
-                  cnn.dropout_keep_prob: 1.0
+                  cnn.dropout_keep_prob: 1.0,
+                  #cnn.embedding: embeddings
                 }
                 step, summaries, loss, accuracy = sess.run(
                     [global_step, dev_summary_op, cnn.loss, cnn.accuracy],
@@ -213,7 +215,7 @@ with tf.Graph().as_default():
         x_test = map_data(x_test, vocab, max_size=x_train.shape[1])
         print(x_test.shape)
 
-        latest_checkpoint = tf.train.latest_checkpoint('runs/1481902792/checkpoints/')
+        latest_checkpoint = tf.train.latest_checkpoint('runs/1482154832/checkpoints/')
         saver = tf.train.import_meta_graph("{}.meta".format(latest_checkpoint))
         saver.restore(sess, latest_checkpoint)
 
@@ -235,7 +237,7 @@ with tf.Graph().as_default():
             batch_predictions = sess.run(predictions, {input_x: x_test_batch, dropout_keep_prob: 1.0})
             all_predictions = np.concatenate([all_predictions, batch_predictions])
 
-        all_predictions = np.where(all_predictions == 1,1, -1)
+        all_predictions = np.where(all_predictions == 0,1, -1)
         # Save the evaluation to a csv
         output_path = data_folder + 'predictions.csv'
         all_predictions = np.column_stack((list(range(1,len(all_predictions) + 1)), all_predictions))

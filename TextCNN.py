@@ -4,7 +4,7 @@ import numpy as np
 class TextCNN(object):
     def __init__(
         self, sequence_length, num_classes, vocab_size,
-        embedding_dim, filter_sizes, num_filters):
+        embedding, filter_sizes, num_filters):
         """
         sequence_length: length of our sentences (all must have the same length: pad all sentences)
         num_classes: number of classes in the output layer (2: positiv and negative)
@@ -15,6 +15,7 @@ class TextCNN(object):
         num_filters: the number of filter per filter size
         """
         #create Variable
+        embedding_dim = embedding.shape[1]
         #embedding_dim = embedding_vectors.shape[1]
         #vocab_size = len(vocab)
 
@@ -24,11 +25,15 @@ class TextCNN(object):
         self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
 
         #First layer: Embedding layer
-        with tf.device('/cpu:0'), tf.name_scope("embedding"):
+        with tf.name_scope("embedding"):
+            self.embedding = tf.Variable(embedding, dtype=tf.float32, name="embedding", trainable=True)
+            """
             W = tf.Variable(
                 tf.random_uniform([vocab_size, embedding_dim], -1.0, 1.0),
                 name="W")
-            self.embedded_chars = tf.nn.embedding_lookup(W, self.input_x)
+            """
+            #self.embedded_chars = tf.nn.embedding_lookup(W, self.input_x)
+            self.embedded_chars = tf.nn.embedding_lookup(self.embedding, self.input_x)
             self.embedded_chars_expanded = tf.expand_dims(self.embedded_chars, -1)
 
 
