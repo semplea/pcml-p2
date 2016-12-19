@@ -7,6 +7,7 @@ import time
 import datetime
 from functions_helpers import *
 from TextCNN import *
+import sklearn.preprocessing as preprocessing #used to normalized word_embeddings
 
 data_folder = 'twitter-datasets/'
 embeddings_dim = 20
@@ -17,6 +18,8 @@ cooc_pickle = data_folder + 'cooc.pkl'
 embeddings_file = data_folder + 'embeddings.npy'
 filter_sizes = "3,4,5" # must be a string, not array of int
 num_filters = 128
+
+train = False
 
 # Parameters
 # ==================================================
@@ -84,45 +87,60 @@ tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularizaion lambda (default: 0
 
 # Training parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("num_epochs", 50, "Number of training epochs (default: 200)")
+tf.flags.DEFINE_integer("num_epochs", 2, "Number of training epochs (default: 200)")
 tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
+#================================
+#Load data
+#================================
 FLAGS = tf.flags.FLAGS
 FLAGS._parse_flags()
+# Load data
+print("Loading data...")
+x_train, y_train = load_data_label(FLAGS.positive_data_file, FLAGS.negative_data_file)
+print('X_train shape', x_train.shape,'Y_train shape',  y_train.shape)
+vocab = load_pickle(FLAGS.vocab_file)
+embeddings = load_embeddings(FLAGS.embeddings_file)
+#normalize embeddings
+embeddings == preprocessing.normalize(embeddings, norm='l2') #TODO not sur if needed or not
+
 print("\nParameters:")
 for attr, value in sorted(FLAGS.__flags.items()):
     print("{}={}".format(attr.upper(), value))
 print("")
 
-
-# Data Preparatopn
+# Data Preparation
 # ==================================================
+
+
+#pad and transform x_train
+load_existing_padded_file = True
+if load_existing_padded_file:
+    x_train = np.load(data_folder + 'x_train_padded.npy')
+    print('x_train_padded loaded, shape: ', x_train.shape)
+else:
+    x_train = map_data(x_train, vocab, save=True)
+
 # Randomly shuffle data
 np.random.seed(10)
 shuffle_indices = np.random.permutation(np.arange(len(y_train)))
 x_shuffled = x_train[shuffle_indices]
 y_shuffled = y_train[shuffle_indices]
 
-
-x_shuffled = x_shuffled
-y_shuffled = y_shuffled
-
-
 # Split train/test set
-# TODO: This is very crude, should use cross-validation
 dev_sample_index =-1 * int(FLAGS.dev_sample_percentage * float(len(y_shuffled)))
 x_train, x_dev = x_shuffled[:dev_sample_index], x_shuffled[dev_sample_index:]
 y_train, y_dev = y_shuffled[:dev_sample_index], y_shuffled[dev_sample_index:]
 print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
 
-vocab_size = len(vocab) + 1
-embedding_dim
-dummy_placeholder = tf.placeholder(tf.float32, [vocab_size, embedding_dim])
 
+#======================
+# Creation of the Graph
+#======================
 with tf.Graph().as_default():
     session_conf = tf.ConfigProto(
       allow_soft_placement=FLAGS.allow_soft_placement,
@@ -178,12 +196,10 @@ with tf.Graph().as_default():
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
         saver = tf.train.Saver(tf.global_variables())
-
-        # Write vocabulary
-        #vocab_processor.save(os.path.join(out_dir, "vocab")) vocab already exists
-
         # Initialize all variables
         sess.run(tf.global_variables_initializer())
+        sess.run(cnn.W_static.assign(embeddings))
+        sess.run(cnn.W_dynamic.assign(embeddings))
 
         def train_step(x_batch, y_batch):
             """
@@ -193,6 +209,7 @@ with tf.Graph().as_default():
               cnn.input_x: x_batch,
               cnn.input_y: y_batch,
               cnn.dropout_keep_prob: FLAGS.dropout_keep_prob,
+              #cnn.W: embeddings
             }
             _, step, summaries, loss, accuracy = sess.run(
                 [train_op, global_step, train_summary_op, cnn.loss, cnn.accuracy],
@@ -209,7 +226,9 @@ with tf.Graph().as_default():
             feed_dict = {
               cnn.input_x: x_batch,
               cnn.input_y: y_batch,
-              cnn.dropout_keep_prob: 1.0
+              cnn.dropout_keep_prob: 1.0,
+              #cnn.W: embeddings
+
             }
             step, summaries, loss, accuracy = sess.run(
                 [global_step, dev_summary_op, cnn.loss, cnn.accuracy],
@@ -219,6 +238,8 @@ with tf.Graph().as_default():
                 print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
             if writer:
                 writer.add_summary(summaries, step)
+
+
 
         # Generate batches
         batches = batch_iter(
