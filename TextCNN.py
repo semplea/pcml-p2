@@ -4,7 +4,7 @@ import numpy as np
 class TextCNN(object):
     def __init__(
         self, sequence_length, num_classes, vocab_size,
-        embedding_dim, filter_sizes, num_filters):
+        embedding_dim, filter_sizes, num_filters, embedding_vectors):
         """
         sequence_length: length of our sentences (all must have the same length: pad all sentences)
         num_classes: number of classes in the output layer (2: positiv and negative)
@@ -25,23 +25,33 @@ class TextCNN(object):
 
         #First layer: Embedding layer
         with tf.device('/cpu:0'), tf.name_scope("embedding_static"):
-            self.W_static = tf.Variable(
-                tf.random_uniform([vocab_size, embedding_dim], -1.0, 1.0),
-                name="W", trainable=False)
-            self.embedded_chars_static = tf.nn.embedding_lookup(self.W_static, self.input_x)
+            W_static = tf.get_variable(
+                name="W",
+                shape=[vocab_size, embedding_dim],
+                initializer=tf.constant_initializer(np.array(embedding_vectors)),
+                trainable = False)
+
+
+            #W_static = tf.
+            #Variable(
+            #    tf.random_uniform([vocab_size, embedding_dim], -1.0, 1.0),
+            #    name="W", trainable=False)
+            #W_static.assign(embedding_vectors)
+            self.embedded_chars_static = tf.nn.embedding_lookup(W_static, self.input_x)
             self.embedded_chars_expanded_static = tf.expand_dims(self.embedded_chars_static, -1)
 
-        with tf.device('/cpu:0'), tf.name_scope("embedding_dynamic"):
-            self.W_dynamic = tf.Variable(
-                tf.random_uniform([vocab_size, embedding_dim], -1.0, 1.0),
-                name="W", trainable=True)
-            self.embedded_chars_dynamic = tf.nn.embedding_lookup(self.W_dynamic, self.input_x)
-            self.embedded_chars_expanded_dynamic = tf.expand_dims(self.embedded_chars_dynamic, -1)
+        #with tf.device('/cpu:0'), tf.name_scope("embedding_dynamic"):
+        #    self.W_dynamic = tf.Variable(
+        #        tf.random_uniform([vocab_size, embedding_dim], -1.0, 1.0),
+        #        name="W", trainable=True)
+        #    self.embedded_chars_dynamic = tf.nn.embedding_lookup(self.W_dynamic, self.input_x)
+        #    self.embedded_chars_expanded_dynamic = tf.expand_dims(self.embedded_chars_dynamic, -1)
 
 
         # Convolution and max pooling layers
         pooled_outputs = []
-        embedded_chars_expandeds = [self.embedded_chars_expanded_static, self.embedded_chars_expanded_dynamic]
+        #embedded_chars_expandeds = [self.embedded_chars_expanded_static, self.embedded_chars_expanded_dynamic]
+        embedded_chars_expandeds = [self.embedded_chars_expanded_static]
 
         for i, filter_size in enumerate(filter_sizes):
             for j,emb in enumerate(embedded_chars_expandeds):
@@ -68,7 +78,7 @@ class TextCNN(object):
                     pooled_outputs.append(pooled)
 
         # Combine all the pooled features
-        num_filters_total = num_filters * len(filter_sizes) * 2 #TODO *2 is because of the 2 channels. Not sure
+        num_filters_total = num_filters * len(filter_sizes) * len(embedded_chars_expandeds) #TODO *2 is because of the 2 channels. Not sure
         self.h_pool = tf.concat(3, pooled_outputs)
         self.h_pool_flat = tf.reshape(self.h_pool, [-1, num_filters_total])
 
