@@ -153,7 +153,8 @@ with tf.Graph().as_default():
             vocab_size=len(vocab) + 1, # the + 1 is for the <pad> token
             embedding_dim= embeddings.shape[1],
             filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
-            num_filters=FLAGS.num_filters)
+            num_filters=FLAGS.num_filters,
+            embedding_vectors=embeddings)
 
         # Define Training procedure
         global_step = tf.Variable(0, name="global_step", trainable=False)
@@ -198,8 +199,8 @@ with tf.Graph().as_default():
         saver = tf.train.Saver(tf.global_variables())
         # Initialize all variables
         sess.run(tf.global_variables_initializer())
-        sess.run(cnn.W_static.assign(embeddings))
-        sess.run(cnn.W_dynamic.assign(embeddings))
+    #    sess.run(cnn.W_static.assign(embeddings))
+    #    sess.run(cnn.W_dynamic.assign(embeddings))
 
         def train_step(x_batch, y_batch):
             """
@@ -209,7 +210,7 @@ with tf.Graph().as_default():
               cnn.input_x: x_batch,
               cnn.input_y: y_batch,
               cnn.dropout_keep_prob: FLAGS.dropout_keep_prob,
-              #cnn.W: embeddings
+              #cnn.W_static: embeddings
             }
             _, step, summaries, loss, accuracy = sess.run(
                 [train_op, global_step, train_summary_op, cnn.loss, cnn.accuracy],
@@ -227,7 +228,7 @@ with tf.Graph().as_default():
               cnn.input_x: x_batch,
               cnn.input_y: y_batch,
               cnn.dropout_keep_prob: 1.0,
-              #cnn.W: embeddings
+              #cnn.W_static: embeddings
 
             }
             step, summaries, loss, accuracy = sess.run(
