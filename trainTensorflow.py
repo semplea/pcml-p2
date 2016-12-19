@@ -47,6 +47,34 @@ embeddings = np.vstack([embeddings, np.ones([1,embeddings.shape[1]])*-999])
 print(embeddings.shape)
 print(len(vocab))
 
+# In[ ]:
+
+FLAGS = tf.flags.FLAGS
+FLAGS._parse_flags()
+# Load data
+print("Loading data...")
+x_train, y_train = load_data_label(FLAGS.positive_data_file, FLAGS.negative_data_file)
+print('X_train shape', x_train.shape,'Y_train shape',  y_train.shape)
+#np.savetxt('x_train_padded.txt', x_train)
+#np.savetxt('y_train_padded.txt', y_train)
+
+# load_vocab
+vocab = load_pickle(FLAGS.vocab_file)
+
+embeddings = np.load(FLAGS.embeddings_file)
+#add one fake word embedding for the random
+embeddings = np.vstack([embeddings, np.ones([1,embeddings.shape[1]])*-999])
+
+print(embeddings.shape)
+print(len(vocab))
+
+
+x_train = map_data(x_train, vocab)
+print('==============')
+print(x_train.shape)
+print('==============')
+# In[ ]:
+
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dim", embeddings_dim, "Dimensionality of character embedding (default: 128)")
 tf.flags.DEFINE_string("filter_sizes", filter_sizes, "Comma-separated filter sizes (default: '3,4,5')")
@@ -80,11 +108,10 @@ x_shuffled = x_train[shuffle_indices]
 y_shuffled = y_train[shuffle_indices]
 
 
-x_shuffled = map_data(x_shuffled[:1000], vocab)
-y_shuffled = y_shuffled[:1000]
+x_shuffled = x_shuffled
+y_shuffled = y_shuffled
 
 
-print(len(y_train))
 # Split train/test set
 # TODO: This is very crude, should use cross-validation
 dev_sample_index =-1 * int(FLAGS.dev_sample_percentage * float(len(y_shuffled)))
@@ -92,6 +119,9 @@ x_train, x_dev = x_shuffled[:dev_sample_index], x_shuffled[dev_sample_index:]
 y_train, y_dev = y_shuffled[:dev_sample_index], y_shuffled[dev_sample_index:]
 print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
 
+vocab_size = len(vocab) + 1
+embedding_dim
+dummy_placeholder = tf.placeholder(tf.float32, [vocab_size, embedding_dim])
 
 with tf.Graph().as_default():
     session_conf = tf.ConfigProto(
@@ -100,7 +130,7 @@ with tf.Graph().as_default():
     sess = tf.Session(config=session_conf)
     with sess.as_default():
         cnn = TextCNN(
-            sequence_length= 64, # TODO change hardcoding
+            sequence_length= x_train.shape[1],
             num_classes=y_train.shape[1],
             vocab_size=len(vocab) + 1, # the + 1 is for the <pad> token
             embedding_dim= embeddings.shape[1],
@@ -162,7 +192,7 @@ with tf.Graph().as_default():
             feed_dict = {
               cnn.input_x: x_batch,
               cnn.input_y: y_batch,
-              cnn.dropout_keep_prob: FLAGS.dropout_keep_prob
+              cnn.dropout_keep_prob: FLAGS.dropout_keep_prob,
             }
             _, step, summaries, loss, accuracy = sess.run(
                 [train_op, global_step, train_summary_op, cnn.loss, cnn.accuracy],
