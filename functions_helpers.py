@@ -5,7 +5,6 @@ from datetime import datetime
 
 data_folder = 'twitter-datasets/'
 
-
 def load_data_label(pos, neg):
     with open(pos) as f:
         pos_data = f.read().splitlines()
