@@ -14,9 +14,9 @@ def filterVocab(file, vocab, size, full=False):
 			found = {}
 			for line in f:
 				s = line.split(" ")
-				if s[1] in v:
-					found[s[1]] = True
-					embeddings[v[s[1]],:] = s[2:]
+				if s[0] in v:
+					found[s[0]] = True
+					embeddings[v[s[0]],:] = s[1:]
 
 			#filtered = {}
 			#for w in v:
