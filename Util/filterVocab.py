@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+import sys
 
 def filterVocab(file, vocab, size):
 	with open(file) as f:
@@ -25,8 +26,11 @@ def filterVocab(file, vocab, size):
 			print(len(found))
 			print(glove.shape)
 
-	np.save("embeddings_glove_full", glove)
+	np.save("embeddings_glove"+str(size)+"_full", glove)
 	#pickle.dump(v, open("vocab_glove.pkl", "wb"))
 
 if __name__ == '__main__':
-	filterVocab("twitter-datasets/glove.twitter.27B.25d.txt", "twitter-datasets/vocab.pkl", 25)
+	assert len(sys.argv) >= 2
+	dim = int(sys.argv[1])
+	full = len(sys.argv) >= 3 and sys.argv[2] == "full"
+	filterVocab("twitter-datasets/glove.twitter.27B." + str(dim) + "d.txt", "twitter-datasets/" + ("vocab_full" if full else "vocab") + ".pkl", dim)
