@@ -11,9 +11,9 @@ import sklearn.preprocessing as preprocessing #used to normalized word_embedding
 
 data_folder = 'twitter-datasets/'
 embeddings_dim = 20
-pos_train_file = data_folder + 'pos_train.txt'
-neg_train_file = data_folder + 'neg_train.txt'
-vocab_pickle = data_folder + 'vocab.pkl'
+pos_train_file = data_folder + 'pos_train_full.txt'
+neg_train_file = data_folder + 'neg_train_full.txt'
+vocab_pickle = data_folder + 'vocab_full.pkl'
 cooc_pickle = data_folder + 'cooc.pkl'
 embeddings_file = data_folder + 'embeddings_glove.npy'
 filter_sizes = "3,4,5" # must be a string, not array of int
@@ -23,7 +23,7 @@ num_filters = 128
 # ==================================================
 
 # Data loading params
-tf.flags.DEFINE_float("dev_sample_percentage", 0.1, "Percentage of the training data to use for validation")
+tf.flags.DEFINE_float("dev_sample_percentage", 0.006, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_string("positive_data_file", pos_train_file, "Data source for the positive data.")
 tf.flags.DEFINE_string("negative_data_file", neg_train_file, "Data source for the positive data.")
 tf.flags.DEFINE_string("vocab_file", vocab_pickle, "Data source for the positive data.")
@@ -39,8 +39,8 @@ tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularizaion lambda (default: 0
 # Training parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 tf.flags.DEFINE_integer("num_epochs", 2, "Number of training epochs (default: 200)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
-tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
+tf.flags.DEFINE_integer("evaluate_every", 2000, "Evaluate model on dev set after this many steps (default: 100)")
+tf.flags.DEFINE_integer("checkpoint_every", 500, "Save model after this many steps (default: 100)")
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")

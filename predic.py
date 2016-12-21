@@ -13,11 +13,11 @@ from TextCNN import *
 import sys # to be removed at the end
 
 data_folder = 'twitter-datasets/'
-vocab_pickle = data_folder + 'vocab.pkl'
-embeddings_file = data_folder + 'embeddings.npy'
+vocab_pickle = data_folder + 'vocab_full.pkl'
+embeddings_file = data_folder + 'embeddings_glove.npy'
 test_file = data_folder + 'test_data.txt'
 
-folder = '1481902792'
+folder = '1482164817'
 
 # Parameters
 # ==================================================

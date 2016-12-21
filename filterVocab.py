@@ -25,7 +25,7 @@ def filterVocab(file, vocab, size):
 			print(len(found))
 			print(glove.shape)
 
-	np.save("embeddings_glove", glove)
+	np.save("embeddings_glove_full", glove)
 	#pickle.dump(v, open("vocab_glove.pkl", "wb"))
 
 if __name__ == '__main__':
