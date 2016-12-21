@@ -94,3 +94,6 @@ runs/
 
 #Mac files
 .DS_Store
+
+#report
+report/

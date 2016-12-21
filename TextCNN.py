@@ -4,7 +4,7 @@ import numpy as np
 class TextCNN(object):
     def __init__(
         self, sequence_length, num_classes, vocab_size,
-        embedding, filter_sizes, num_filters):
+        embedding, filter_sizes, num_filters, l2_reg_lambda):
         """
         sequence_length: length of our sentences (all must have the same length: pad all sentences)
         num_classes: number of classes in the output layer (2: positiv and negative)
@@ -23,6 +23,9 @@ class TextCNN(object):
         self.input_x = tf.placeholder(tf.int32, [None, sequence_length], name="input_x")
         self.input_y = tf.placeholder(tf.float32, [None, num_classes], name="input_y")
         self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
+
+        # Keep track of l2_loss for regularization
+        l2_loss = tf.constant(0.0)
 
         #First layer: Embedding layer
         with tf.device('/cpu:0'), tf.name_scope("embedding"):
@@ -94,13 +97,14 @@ class TextCNN(object):
         with tf.name_scope("output"):
             W = tf.Variable(tf.truncated_normal([num_filters_total, num_classes], stddev=0.1), name="W")
             b = tf.Variable(tf.constant(0.1, shape=[num_classes]), name="b")
+            l2_loss += tf.nn.l2_loss(W)
             self.scores = tf.nn.xw_plus_b(self.h_drop, W, b, name="scores")
             self.predictions = tf.argmax(self.scores, 1, name="predictions")
 
         # Calculate mean cross-entropy loss
         with tf.name_scope("loss"):
             losses = tf.nn.softmax_cross_entropy_with_logits(self.scores, self.input_y)
-            self.loss = tf.reduce_mean(losses)
+            self.loss = tf.reduce_mean(losses) + l2_reg_lambda * l2_loss
 
             # Calculate Accuracy
         with tf.name_scope("accuracy"):

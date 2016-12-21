@@ -10,10 +10,10 @@ from TextCNN import *
 import sklearn.preprocessing as preprocessing #used to normalized word_embeddings
 
 data_folder = 'twitter-datasets/'
-embeddings_dim = 20
-pos_train_file = data_folder + 'pos_train_full.txt'
-neg_train_file = data_folder + 'neg_train_full.txt'
-vocab_pickle = data_folder + 'vocab_full.pkl'
+embedding_dim = 20
+pos_train_file = data_folder + 'pos_train.txt'
+neg_train_file = data_folder + 'neg_train.txt'
+vocab_pickle = data_folder + 'vocab.pkl'
 cooc_pickle = data_folder + 'cooc.pkl'
 embeddings_file = data_folder + 'embeddings_glove.npy'
 filter_sizes = "3,4,5" # must be a string, not array of int
@@ -30,11 +30,11 @@ tf.flags.DEFINE_string("vocab_file", vocab_pickle, "Data source for the positive
 tf.flags.DEFINE_string("embeddings_file", embeddings_file, "Data source for the positive data.")
 
 # Model Hyperparameters
-tf.flags.DEFINE_integer("embedding_dim", embeddings_dim, "Dimensionality of character embedding (default: 128)")
+tf.flags.DEFINE_integer("embedding_dim", embedding_dim, "Dimensionality of character embedding (default: 128)")
 tf.flags.DEFINE_string("filter_sizes", filter_sizes, "Comma-separated filter sizes (default: '3,4,5')")
 tf.flags.DEFINE_integer("num_filters", num_filters, "Number of filters per filter size (default: 128)")
 tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularizaion lambda (default: 0.0)")
+tf.flags.DEFINE_float("l2_reg_lambda", 0.1, "L2 regularizaion lambda (default: 0.0)")
 
 # Training parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
@@ -104,7 +104,8 @@ with tf.Graph().as_default():
             vocab_size=len(vocab) + 1, # the + 1 is for the <pad> token
             embedding= embeddings,
             filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
-            num_filters=FLAGS.num_filters)
+            num_filters=FLAGS.num_filters,
+            l2_reg_lambda=FLAGS.l2_reg_lambda)
 
         # Define Training procedure
         global_step = tf.Variable(0, name="global_step", trainable=False)
