@@ -19,7 +19,7 @@ tf.flags.DEFINE_string("embeddings", "", "Word embeddings file")
 tf.flags.DEFINE_boolean("full", False, "Use the full dataset instead of the reduced one")
 
 # Model parameters
-tf.flags.DEFINE_float("dev_sample_percentage", 0.05, "Percentage of the training data to use for validation")
+tf.flags.DEFINE_float("dev_sample_percentage", 0.005, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_string("filter_sizes", "3,4,5", "Comma-separated filter sizes (default: '3,4,5')")
 tf.flags.DEFINE_integer("num_filters", 128, "Number of filters per filter size (default: 128)")
 tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
@@ -28,7 +28,7 @@ tf.flags.DEFINE_float("l2_reg_lambda", 1e-5, "L2 regularizaion lambda (default: 
 # Training parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 tf.flags.DEFINE_integer("num_epochs", 2, "Number of training epochs (default: 2)")
-tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
+tf.flags.DEFINE_integer("evaluate_every", 2000, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 2000, "Save model after this many steps (default: 100)")
 
 # Misc parameters
@@ -157,7 +157,7 @@ with tf.Graph().as_default():
 		if not os.path.exists(checkpoint_dir):
 			os.makedirs(checkpoint_dir)
 		saver = tf.train.Saver(tf.global_variables())
-		
+
 		# Initialize all variables
 		sess.run(tf.global_variables_initializer())
 		# sess.run(cnn.W_static.assign(embeddings))
@@ -207,7 +207,7 @@ with tf.Graph().as_default():
 		# Generate batches
 		batches = batch_iter(
 			list(zip(x_train, y_train)), FLAGS.batch_size, FLAGS.num_epochs)
-		
+
 		# Training loop. For each batch...
 		for batch in batches:
 			# Train on batch
