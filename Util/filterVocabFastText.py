@@ -16,7 +16,7 @@ def filterVocab(file, vocab, size, full=False):
 				s = line.split(" ")
 				if s[0] in v:
 					found[s[0]] = True
-					embeddings[v[s[0]],:] = s[1:]
+					embeddings[v[s[0]],:] = s[1:101]
 
 			#filtered = {}
 			#for w in v:
@@ -31,4 +31,4 @@ def filterVocab(file, vocab, size, full=False):
 
 if __name__ == '__main__':
 	full = len(sys.argv) >= 2 and sys.argv[2] == "full"
-	filterVocab("twitter-datasets/model.vec", "twitter-datasets/" + ("vocab_full" if full else "vocab") + ".pkl", 100, full)
+	filterVocab("twitter-datasets/fasttext.vec", "twitter-datasets/" + ("vocab_full" if full else "vocab") + ".pkl", 100, full)
