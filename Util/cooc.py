@@ -6,19 +6,20 @@ import sys
 
 
 def main():
-    if len(sys.argv) == 'small':
-        pos_train = 'pos_train.txt'
-        neg_train = 'neg_train.txt'
-        output = 'cooc.pkl'
-    elif sys.argv[1] == 'full':
+    if len(sys.argv) >= 2 and sys.argv[1] == 'full':
+        print("yes")
         pos_train = 'pos_train_full.txt'
         neg_train = 'neg_train_full.txt'
+        vocab_file = 'vocab_full.pkl'
         output = 'cooc_full.pkl'
     else:
-        print("Give as argument 'small' to use only 10% of the data set of 'full' to run over the whole set")
-        return
+        print("no")
+        pos_train = 'pos_train.txt'
+        neg_train = 'neg_train.txt'
+        vocab_file = 'vocab.pkl'
+        output = 'cooc.pkl'
 
-    with open('vocab.pkl', 'rb') as f:
+    with open(vocab_file, 'rb') as f:
         vocab = pickle.load(f)
     vocab_size = len(vocab)
 

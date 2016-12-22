@@ -33,4 +33,4 @@ if __name__ == '__main__':
 	assert len(sys.argv) >= 2
 	dim = int(sys.argv[1])
 	full = len(sys.argv) >= 3 and sys.argv[2] == "full"
-	filterVocab("twitter-datasets/glove.twitter.27B." + str(dim) + "d.txt", "twitter-datasets/" + ("vocab_full" if full else "vocab") + ".pkl", dim)
+	filterVocab("glove.twitter.27B." + str(dim) + "d.txt", "vocab" + ("_full" if full else "") + ".pkl", dim)

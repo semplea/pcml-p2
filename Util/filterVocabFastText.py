@@ -30,5 +30,5 @@ def filterVocab(file, vocab, size, full=False):
 	#pickle.dump(v, open("vocab_glove.pkl", "wb"))
 
 if __name__ == '__main__':
-	full = len(sys.argv) >= 2 and sys.argv[2] == "full"
-	filterVocab("twitter-datasets/fasttext.vec", "twitter-datasets/" + ("vocab_full" if full else "vocab") + ".pkl", 100, full)
+	full = len(sys.argv) >= 2 and sys.argv[1] == "full"
+	filterVocab("fasttext.vec", "vocab" + ("_full" if full else "") + ".pkl", 100, full)

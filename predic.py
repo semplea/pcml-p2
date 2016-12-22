@@ -17,6 +17,7 @@ import sys # to be removed at the end
 tf.flags.DEFINE_string("data", "twitter-datasets/", "Folder containing the data files")
 tf.flags.DEFINE_boolean("full", False, "Use the full dataset instead of the reduced one")
 tf.flags.DEFINE_string("name", "", "Name of the run to use")
+tf.flags.DEFINE_integer("size", 63, "Maximal number of words in the tweets")
 
 # Misc Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
@@ -28,7 +29,6 @@ FLAGS._parse_flags()
 
 # File paths
 data_folder = FLAGS.data
-x_train_file = data_folder + 'x_train_padded' + ('_full' if FLAGS.full else '') + '.npy'
 vocab_file = data_folder + 'vocab' + ('_full' if FLAGS.full else '') + '.pkl'
 test_file = data_folder + 'test_data.txt'
 checkpoint_dir = 'runs/' + FLAGS.name + '/checkpoints/'
@@ -36,10 +36,9 @@ checkpoint_dir = 'runs/' + FLAGS.name + '/checkpoints/'
 #============
 # Load data
 #============
-x_train = np.load(x_train_file) # TODO: used for finding the size for the padding of test set. Other solution?
 vocab = load_pickle(vocab_file)
 x_test = load_test(test_file)
-x_test = map_data(x_test, vocab, max_size=x_train.shape[1])
+x_test = map_data(x_test, vocab, max_size=FLAGS.max_size)
 print('Test set shape', x_test.shape)
 
 #======================

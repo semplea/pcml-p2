@@ -9,10 +9,10 @@ import sys
 def main():
     if len(sys.argv) < 2 or sys.argv[1] == 'small':
         cooc_file = 'cooc.pkl'
-        embeddings = 'embeddings'
+        embeddings = 'embeddings_glove-basic'
     elif sys.argv[1] == 'full':
         cooc_file =  'cooc_full.pkl'
-        embeddings = 'embeddings_full'
+        embeddings = 'embeddings_glove-basic_full'
     else:
         print("Give as argument 'small' to use only 10% of the data set of 'full' to run over the whole set")
         return 
