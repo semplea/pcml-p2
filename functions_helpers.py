@@ -46,6 +46,8 @@ def pad_tweet(tweet, max_size, dummy_idx):
     size = len(tweet)
     if size < max_size:
         tweet = np.append(tweet, [dummy_idx] * (max_size-size))
+    else:
+        tweet = tweet[:max_size]       
     return tweet
 
 def length_tweet(tweet, vocab):
