@@ -38,7 +38,7 @@ checkpoint_dir = 'runs/' + FLAGS.name + '/checkpoints/'
 #============
 vocab = load_pickle(vocab_file)
 x_test = load_test(test_file)
-x_test = map_data(x_test, vocab, max_size=FLAGS.max_size)
+x_test = map_data(x_test, vocab, max_size=FLAGS.size)
 print('Test set shape', x_test.shape)
 
 #======================
