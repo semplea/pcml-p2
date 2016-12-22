@@ -21,7 +21,7 @@ The steps described below are analoguous for the full dataset (`pos_train_full.t
 2. Compute the GloVe matrix (`glove_solution.py`). Yields `embeddings_glove-basic.npy`
 
 ### Stanford GloVe vectors (`glove`)
-In what follows, `**` represents the number of features of the word vectore (25, 50, 100 or 200)
+In what follows, `**` represents the number of features of the word vector (25, 50, 100 or 200)
 
 1. The vectors are in `twitter-datasets/glove.twitter.27B.**d.txt`
 2. Compute the word embedding for a given dimension (`filterVocab.py **`). Yields `embeddings_glove**.npy`)
