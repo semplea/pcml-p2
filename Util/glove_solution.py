@@ -7,7 +7,7 @@ import sys
 
 
 def main():
-    if len(sys.argv) == 'small':
+    if len(sys.argv) < 2 or sys.argv[1] == 'small':
         cooc_file = 'cooc.pkl'
         embeddings = 'embeddings'
     elif sys.argv[1] == 'full':
@@ -27,7 +27,7 @@ def main():
     print("using nmax =", nmax, ", cooc.max() =", cooc.max())
 
     print("initializing embeddings")
-    embedding_dim = 20
+    embedding_dim = 25
     xs = np.random.normal(size=(cooc.shape[0], embedding_dim))
     ys = np.random.normal(size=(cooc.shape[1], embedding_dim))
 
