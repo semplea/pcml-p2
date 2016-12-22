@@ -17,24 +17,25 @@ The steps described below are analoguous for the full dataset (`pos_train_full.t
 ## Word embedding computation (execute while in `twitter-datasets/` folder)
 
 ### Provided GloVe algorithm (`glove-basic`)
-4. Compute the cooccurence matrix (`cooc.py`). Yields `cooc.pkl`
-5. Compute the GloVe matrix (`glove_solution.py`). Yields `embeddings_glove-basic.npy`
+1. Compute the cooccurence matrix (`cooc.py`). Yields `cooc.pkl`
+2. Compute the GloVe matrix (`glove_solution.py`). Yields `embeddings_glove-basic.npy`
 
 ### Stanford GloVe vectors (`glove`)
 In what follows, `**` represents the number of features of the word vectore (25, 50, 100 or 200)
-4. The vectors are in `twitter-datasets/glove.twitter.27B.**d.txt`
-5. Compute the word embedding for a given dimension (`filterVocab.py **`). Yields `embeddings_glove**.npy`)
+
+1. The vectors are in `twitter-datasets/glove.twitter.27B.**d.txt`
+2. Compute the word embedding for a given dimension (`filterVocab.py **`). Yields `embeddings_glove**.npy`)
 
 ### FastText (`fasttext`)
-4. Compute the fastText vectors (`./fasttext skipgram -input data.txt -output model`). Yields `model.vec` (`data.txt` is a concatenation of the positive and negative train sets)
-5. Compute the word embedding for our vocabulary (`filterVocabFastText.py`). Yields `embeddings_fasttext.npy`
+1. Compute the fastText vectors (`./fasttext skipgram -input data.txt -output model`). Yields `model.vec` (`data.txt` is a concatenation of the positive and negative train sets)
+2. Compute the word embedding for our vocabulary (`filterVocabFastText.py`). Yields `embeddings_fasttext.npy`
 
 ## Network training (execute while in main folder)
 To apply `trainTensorflow.py` and `predic.py` to the full dataset, use `--full`
 
-6. Load and pad the training data (`loadData.py`). Yields `x_train_padded.npy` and `y_train.npy`
-7. Train the neural network (`trainTensorflow.py --embeddings=***`), where `***` is the name of the chosen embedding (`glove-basic`, `glove**` or `fasttext`). Yields detailed run data in `runs/***_****/`, where `****` is the timestamp of the run
-8. Generate predictions from the test set (`predic.py --name=***_****`). Yields `predictions.csv`
+1. Load and pad the training data (`loadData.py`). Yields `x_train_padded.npy` and `y_train.npy`
+2. Train the neural network (`trainTensorflow.py --embeddings=***`), where `***` is the name of the chosen embedding (`glove-basic`, `glove**` or `fasttext`). Yields detailed run data in `uns/***_****/`, where `****` is the timestamp of the run
+3 . Generate predictions from the test set (`predic.py --name=***_****`). Yields `predictions.csv`
 
 ## External libraries uses
 
